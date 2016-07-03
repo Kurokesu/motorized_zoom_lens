@@ -1,7 +1,7 @@
-# Author: Saulius Lukse
-# Copyright: Copyright 2016, kurokesu.com
-# version: 0.1
-# license: GPL
+// Author: Saulius Lukse
+// Copyright: Copyright 2016, kurokesu.com
+// version: 0.1
+// license: GPL
 
 #define ST          10  // PB2
 #define STEP1       9   // PB1
