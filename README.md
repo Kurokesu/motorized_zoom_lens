@@ -11,7 +11,7 @@
 
 
 ### Images
-<img src="imagesv0.2_tele.jpg" width="300px"/>
+<img src="images/v0.2_tele.jpg" width="500px"/>
 
 
 ### Videos
