@@ -11,10 +11,6 @@
 
 
 ### Images
-<<<<<<< HEAD
-<img src="images/v0.4_view.png" width="400px"/>
-=======
-<img src="images/v0.2_tele.jpg" width="500px"/>
->>>>>>> origin/master
+<img src="images/v0.4_view.png" width="500px"/>
 
-<img src="images/IMG_1421_2r.jpg" width="400px"/>
+<img src="images/IMG_1421_2r.jpg" width="500px"/>
