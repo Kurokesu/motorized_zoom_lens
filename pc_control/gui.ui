@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>430</width>
-    <height>376</height>
+    <width>640</width>
+    <height>662</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string>Kurokesu zoom lens test application</string>
@@ -20,7 +26,7 @@
       <x>10</x>
       <y>10</y>
       <width>200</width>
-      <height>100</height>
+      <height>101</height>
      </rect>
     </property>
     <property name="title">
@@ -36,30 +42,17 @@
       </rect>
      </property>
     </widget>
-    <widget class="QPushButton" name="btn_disconnect">
-     <property name="geometry">
-      <rect>
-       <x>110</x>
-       <y>60</y>
-       <width>80</width>
-       <height>23</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Disconnect</string>
-     </property>
-    </widget>
     <widget class="QPushButton" name="btn_connect">
      <property name="geometry">
       <rect>
        <x>10</x>
        <y>60</y>
-       <width>80</width>
+       <width>181</width>
        <height>23</height>
       </rect>
      </property>
      <property name="text">
-      <string>Connect</string>
+      <string>Connect to controller</string>
      </property>
     </widget>
    </widget>
@@ -69,10 +62,10 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>120</y>
+      <x>220</x>
+      <y>10</y>
       <width>410</width>
-      <height>211</height>
+      <height>221</height>
      </rect>
     </property>
     <property name="title">
@@ -81,8 +74,8 @@
     <widget class="QDial" name="dial_zoom">
      <property name="geometry">
       <rect>
-       <x>40</x>
-       <y>30</y>
+       <x>70</x>
+       <y>10</y>
        <width>150</width>
        <height>150</height>
       </rect>
@@ -133,8 +126,8 @@
      </property>
      <property name="geometry">
       <rect>
-       <x>210</x>
-       <y>30</y>
+       <x>240</x>
+       <y>10</y>
        <width>150</width>
        <height>150</height>
       </rect>
@@ -182,37 +175,43 @@
     <widget class="QLabel" name="label_zoom">
      <property name="geometry">
       <rect>
-       <x>100</x>
+       <x>130</x>
        <y>180</y>
        <width>46</width>
        <height>13</height>
       </rect>
      </property>
      <property name="text">
-      <string>---</string>
+      <string>0</string>
      </property>
     </widget>
     <widget class="QLabel" name="label_focus">
      <property name="geometry">
       <rect>
-       <x>270</x>
+       <x>300</x>
        <y>180</y>
        <width>46</width>
        <height>13</height>
       </rect>
      </property>
      <property name="text">
-      <string>---</string>
+      <string>0</string>
      </property>
     </widget>
     <widget class="QLabel" name="label">
      <property name="geometry">
       <rect>
-       <x>101</x>
-       <y>105</y>
+       <x>130</x>
+       <y>160</y>
        <width>46</width>
        <height>13</height>
       </rect>
+     </property>
+     <property name="font">
+      <font>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
      </property>
      <property name="text">
       <string>Focus</string>
@@ -221,59 +220,134 @@
     <widget class="QLabel" name="label_2">
      <property name="geometry">
       <rect>
-       <x>273</x>
-       <y>105</y>
+       <x>300</x>
+       <y>160</y>
        <width>46</width>
        <height>13</height>
       </rect>
+     </property>
+     <property name="font">
+      <font>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
      </property>
      <property name="text">
       <string>Zoom</string>
      </property>
     </widget>
+    <widget class="QLabel" name="label_focus_real">
+     <property name="geometry">
+      <rect>
+       <x>130</x>
+       <y>200</y>
+       <width>46</width>
+       <height>13</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>0</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_zoom_real">
+     <property name="geometry">
+      <rect>
+       <x>300</x>
+       <y>200</y>
+       <width>46</width>
+       <height>13</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>0</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_5">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>160</y>
+       <width>71</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Dial function</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_6">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>180</y>
+       <width>71</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Dial position</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_7">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>200</y>
+       <width>71</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Real position</string>
+     </property>
+    </widget>
    </widget>
-   <widget class="QGroupBox" name="group_special">
-    <property name="enabled">
-     <bool>true</bool>
-    </property>
+   <widget class="QGroupBox" name="group_preview">
     <property name="geometry">
      <rect>
-      <x>220</x>
-      <y>10</y>
-      <width>200</width>
-      <height>100</height>
+      <x>10</x>
+      <y>240</y>
+      <width>621</width>
+      <height>371</height>
      </rect>
     </property>
     <property name="title">
-     <string>Special controls</string>
+     <string>Video preview</string>
     </property>
-    <widget class="QPushButton" name="btn_initlens">
-     <property name="enabled">
-      <bool>true</bool>
-     </property>
+    <widget class="QWidget" name="widget_video" native="true">
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>25</y>
-       <width>180</width>
-       <height>23</height>
+       <y>20</y>
+       <width>601</width>
+       <height>341</height>
       </rect>
-     </property>
-     <property name="text">
-      <string>Init lens</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="btn_powersave">
+   </widget>
+   <widget class="QGroupBox" name="group_video">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>120</y>
+      <width>201</width>
+      <height>111</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Video control</string>
+    </property>
+    <widget class="QPushButton" name="btn_video">
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>60</y>
-       <width>180</width>
-       <height>23</height>
+       <y>20</y>
+       <width>181</width>
+       <height>71</height>
       </rect>
      </property>
      <property name="text">
-      <string>Power save</string>
+      <string>Connect to cemera</string>
      </property>
     </widget>
    </widget>
@@ -283,7 +357,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>430</width>
+     <width>640</width>
      <height>21</height>
     </rect>
    </property>

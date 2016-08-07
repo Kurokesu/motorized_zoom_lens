@@ -2,10 +2,17 @@
 
 1. Install pyqt:
   * https://www.riverbankcomputing.com/software/pyqt/download
+  * Install OpenCV 3.0
+
 
 2. Install python packages:
   * pip install enum34
   * pip install pyserial
+
+
+### Images
+<img src="imagesv0.2_tele.jpg" width="300px"/>
+
 
 ### Videos
 
