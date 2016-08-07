@@ -2,7 +2,7 @@
 
 __author__      = "Saulius Lukse"
 __copyright__   = "Copyright 2016, kurokesu.com"
-__version__ = "0.3"
+__version__ = "0.4"
 __license__ = "GPL"
 
 
@@ -21,6 +21,10 @@ v0.3
 * Remove init lens and power save buttons. Not needed any more
 * Load settings on boot, set dials to correct position
 * add camera view / 640x480 @ 30fps? / some issues setting to MJPG mode
+
+v0.4
+----
+* basic software autofocus implementation
 
 '''
 
@@ -50,12 +54,12 @@ form_class = uic.loadUiType("gui.ui")[0]
 ser = serial.Serial()
 q = Queue.Queue()
 q_labels = Queue.Queue()
-#img_q = Queue.Queue()
-pos_zoom = 0
-pos_focus = 0
-speed = 30
-max_zoom = 55000
-max_focus = 21000
+max_1 = 55000
+max_2 = 21000
+
+autofocus_step = 200
+autofocus_best = 0
+
 running = True
 json_file = 'settings.json'
 config = {}
@@ -64,8 +68,17 @@ video_running = False
 capture_thread = None
 q_video = Queue.Queue()
 
+autofocus_state = 0
+focus_data = []
+
 
 config = utils.json_boot_routine(json_file)
+
+def get_blur(frame, scale):
+    frame = cv2.resize(frame, None, fx=scale, fy=scale, interpolation = cv2.INTER_CUBIC)
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    fm = cv2.Laplacian(gray, cv2.CV_64F).var()     
+    return fm
 
 
 def grab(cam, queue, width, height, fps):
@@ -80,7 +93,11 @@ def grab(cam, queue, width, height, fps):
         capture.grab()
         retval, img = capture.retrieve(0)
         frame["img"] = img
-        #print '.',
+        frame["1"] = config["1"]
+        frame["2"] = config["2"]
+
+        blur = get_blur(img, 0.05)
+        frame["blur"] = blur
 
         if queue.qsize() < 10:
             queue.put(frame)
@@ -112,18 +129,21 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
         self.setupUi(self)
 
         self.btn_video.clicked.connect(self.start_video_clicked)
+        self.btn_autofocus.setEnabled(False)
+
+        self.push_zero.clicked.connect(self.zero_clicked)
+        self.push_zero.setEnabled(False)
 
         self.btn_connect.clicked.connect(self.btn_connect_clicked)
-        #self.btn_disconnect.clicked.connect(self.btn_disconnect_clicked)
+        self.btn_autofocus.clicked.connect(self.btn_autofocus_clicked)
 
-        self.dial_zoom.valueChanged.connect(self.zoom_adjust)
-        self.dial_focus.valueChanged.connect(self.focus_adjust)
+        self.dial_1.valueChanged.connect(self.adjust_1)
+        self.dial_2.valueChanged.connect(self.adjust_2)
 
         self.group_controls.setEnabled(False)
-        #self.btn_disconnect.setEnabled(False)
 
-        self.dial_focus.setMaximum(max_focus)
-        self.dial_zoom.setMaximum(max_zoom)
+        self.dial_1.setMaximum(max_1)
+        self.dial_2.setMaximum(max_2)
 
         # setup video timer and widget
         w = self.widget_video.width() 
@@ -131,13 +151,12 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
         self.widget_video = OwnImageWidget(self.widget_video)
         self.widget_video.resize(w, h)
 
-
-
+        # setup update frame thread
         self.timer = QtCore.QTimer(self)
         self.timer.timeout.connect(self.update_frame)
         self.timer.start(1)
 
-
+        # setup com port comunication
         self.combo_ports.clear()
         com_ports = sorted(comports())
         for port, desc, hwid in com_ports:
@@ -147,15 +166,24 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
         self.timer1.timeout.connect(self.update_pos)
         self.timer1.start(1)
 
+    def zero_clicked(self):
+        cmd = 'G92 X0 Y0\n'
+        ser.write(cmd)
+
 
     def update_frame(self):
+        global autofocus_state
+        global autofocus_best
+        global focus_data
+
         if not q_video.empty():
             self.btn_video.setText('Camera is live')
+            #self.btn_autofocus.setEnabled(True)
             frame = q_video.get()
             img = frame["img"]
+            #print frame["1"], frame["2"]
 
             img_height, img_width, img_colors = img.shape
-
 
             scale_w = float(self.widget_video.width()) / float(img_width)
             scale_h = float(self.widget_video.height()) / float(img_height)
@@ -171,11 +199,106 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
             image = QtGui.QImage(img.data, width, height, bpl, QtGui.QImage.Format_RGB888)
             self.widget_video.setImage(image)
 
+            blur = frame["blur"]
+            self.label_blur.setText('%d' % blur)
+            self.progress_focus.setValue(blur)
+
+            # here starts autofocus code
+            # --------------------------
+
+            # just wait and do nothing
+            if (autofocus_state == 1) and (int(frame["1"]) != 0):
+                self.btn_autofocus.setText('Going to 0 focus point...')
+                focus_data = []
+                pass
+            
+            # swith to next state
+            if (autofocus_state == 1) and (int(frame["1"]) == 0):
+                autofocus_state = 2
+
+            # collect data and move lens
+            if (autofocus_state == 2) and (int(frame["1"]) < 55000):
+                self.btn_autofocus.setText('Analyzing frames...')
+
+                # save data
+                metadata = frame
+                metadata["img"] = None # don't collect whole frame
+                focus_data.append(metadata)
+
+                # move lens
+                value = self.dial_1.value()
+                value += autofocus_step
+                self.dial_1.setValue(value)
+
+
+            if (autofocus_state == 2) and (int(frame["1"]) == 55000):
+                autofocus_state = 3
+                self.btn_autofocus.setText('Saving data...')
+                # save collected data
+
+            if (autofocus_state == 3):
+                autofocus_state = 4
+                max_focus_val = 0.0
+                max_focus_pos = 0
+                for frame in focus_data:
+                    if max_focus_val < float(frame["blur"]):
+                        max_focus_val = float(frame["blur"])
+                        max_focus_pos = int(frame["1"])
+
+                print max_focus_val, max_focus_pos
+                autofocus_best = max_focus_pos + 800 # backlash in a lens
+
+                self.btn_autofocus.setText('Analyzing data...')
+
+            if (autofocus_state == 4):
+                autofocus_state = 5
+                self.dial_1.setValue(autofocus_best)
+                self.btn_autofocus.setText('Moving to best spot...')
+
+            if (autofocus_state == 5) and (int(frame["1"]) == autofocus_best):
+                autofocus_state = 0
+                self.btn_autofocus.setText('Autofocus')
+                self.btn_autofocus.setEnabled(True)
+                self.dial_1.setEnabled(True)
+                self.dial_2.setEnabled(True)
+
+
+            #self.label_temp.setText(str(len(focus_data)))
+            #self.label_temp.setText(str(frame["1"]))
+
+    def btn_autofocus_clicked(self):
+        global autofocus_state
+
+        if autofocus_state == 0:
+            self.btn_autofocus.setEnabled(False)
+            self.dial_1.setEnabled(False)
+            self.dial_2.setEnabled(False)
+            autofocus_state = 1
+            #self.btn_autofocus.setText('Going to 0 focus point...')
+            self.dial_1.setValue(0) # change focus to 0
+
+
+
+
+        '''
+        start autofocus thread + state machine
+
+        1 - set dial focus = 0
+        2 - wait until feedback == 0
+        3 - change focus slowly until feedback == max, collecta/analyze frames and save
+        4 - analyze where is the best focus
+        5 - goto 0
+        6 - goto best focus position
+
+        '''
+
+
     def start_video_clicked(self):
         global video_running
         video_running = True
         capture_thread.start()
         self.btn_video.setEnabled(False)
+        self.btn_autofocus.setEnabled(True)
         self.btn_video.setText('Starting...')
 
 
@@ -184,20 +307,21 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
         if not q_labels.empty():
             f = q_labels.get()
             if not boot_sequence:
-                self.label_focus_real.setText(f["1"])
-                self.label_zoom_real.setText(f["2"])
+                self.label_1_real.setText(f["X"])
+                self.label_2_real.setText(f["Y"])
             else:
                 # Send command to adjust offset to controller
                 cmd = 'G92 X'+str(config["1"])+' Y'+str(config["2"])+'\n'
                 ser.write(cmd)
 
                 # update dials
-                self.dial_zoom.setValue(int(config["1"]))
-                self.dial_focus.setValue(int(config["2"]))
+                self.dial_1.setValue(int(config["1"]))
+                self.dial_2.setValue(int(config["2"]))
 
                 # enable dials
-                self.dial_zoom.setEnabled(True)
-                self.dial_focus.setEnabled(True)
+                self.dial_2.setEnabled(True)
+                self.dial_1.setEnabled(True)
+                self.push_zero.setEnabled(True)
                 boot_sequence = False
 
 
@@ -220,19 +344,20 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
         self.group_controls.setEnabled(True)
         self.btn_connect.setEnabled(False)
         self.combo_ports.setEnabled(False)
-        self.dial_zoom.setEnabled(False)
-        self.dial_focus.setEnabled(False)
+        self.dial_2.setEnabled(False)
+        self.dial_1.setEnabled(False)
+        #self.push_zero.setEnabled(False)
 
-    def zoom_adjust(self):
-        value = self.dial_zoom.value()
-        self.label_zoom.setText(str(value))
-        cmd = 'G0 X'+str(value)+'\n'
+    def adjust_2(self):
+        value = self.dial_2.value()
+        self.label_2.setText(str(value))
+        cmd = 'G0 Y'+str(value)+'\n'
         ser.write(cmd)
 
-    def focus_adjust(self):
-        value = self.dial_focus.value()
-        self.label_focus.setText(str(value))
-        cmd = 'G0 Y'+str(value)+'\n'
+    def adjust_1(self):
+        value = self.dial_1.value()
+        self.label_1.setText(str(value))
+        cmd = 'G0 X'+str(value)+'\n'
         ser.write(cmd)
 
     def closeEvent(self, event):
@@ -263,8 +388,8 @@ def serial_sender():
                     q_labels.put(feedback)
 
                     if not boot_sequence:
-                        config["1"] = feedback["1"]
-                        config["2"] = feedback["2"]
+                        config["1"] = feedback["X"]
+                        config["2"] = feedback["Y"]
 
                 line_old = line
             except:

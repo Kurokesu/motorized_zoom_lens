@@ -1,6 +1,6 @@
 // Author: Saulius Lukse
 // Copyright: Copyright 2016, kurokesu.com
-// version: 0.2
+// version: 0.3
 // license: GPL
 
 /* Changelist: 
@@ -10,6 +10,7 @@
  * New function: Stop function - M0
  * New function: set current coordinate - G92 Xxx Yyy
  * Reduced power consumption, therefore solved motor heating issue
+ * Reversed zoom
  */
 
 /*
@@ -74,7 +75,7 @@ unsigned int counter_s1_old = 0;
 unsigned int counter_s2_old = 0;
 unsigned int desired_s1 = 0;
 unsigned int desired_s2 = 0;
-unsigned int timer_speed = 500;
+unsigned int timer_speed = 600;
 unsigned int power_value = 1;
 uint8_t last_cmd_s1 = 0;
 uint8_t last_cmd_s2 = 0;
@@ -200,9 +201,7 @@ void timer_setup()
 
 ISR(TIMER1_COMPA_vect)
 {
-    //BIT_FLIP(PORTB, 5);
-
-    // ------------------------
+    // ------------------------------------------------------------
     if(desired_s1 > counter_s1)
     {
       cmd = 150;
@@ -227,8 +226,7 @@ ISR(TIMER1_COMPA_vect)
 
     if(desired_s1 < counter_s1)
     {
-      cmd = 134; // output off
-      
+      cmd = 134;
       if(cmd!=last_cmd_s1)
       {
         LV8044_send_byte(cmd);
@@ -250,7 +248,6 @@ ISR(TIMER1_COMPA_vect)
 
     if(desired_s1 == counter_s1)
     {
-      //cmd = 132; // power off
       cmd = 142; // HOLD
 
       if(cmd!=last_cmd_s1)
@@ -261,10 +258,11 @@ ISR(TIMER1_COMPA_vect)
     }
     
 
-    // ------------------------
+    // ------------------------------------------------------------
     if(desired_s2 > counter_s2)
     {
-      cmd = 214;
+      //cmd = 214;
+      cmd = 198;
       if(cmd!=last_cmd_s2)
       {
         LV8044_send_byte(cmd);
@@ -286,7 +284,8 @@ ISR(TIMER1_COMPA_vect)
 
     if(desired_s2 < counter_s2)
     {
-      cmd = 198;
+      //cmd = 198;
+      cmd = 214;
       if(cmd!=last_cmd_s2)
       {
         LV8044_send_byte(cmd);
@@ -481,10 +480,10 @@ void loop()
     send_counter += 1;
     if(send_counter > 500)
     {
-          Serial.print("!,1=");
+          Serial.print("!,X=");
           Serial.print(counter_s1);
           
-          Serial.print(",2=");
+          Serial.print(",Y=");
           Serial.print(counter_s2);
           
           Serial.print(",T=");

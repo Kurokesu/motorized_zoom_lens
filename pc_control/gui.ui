@@ -26,7 +26,7 @@
       <x>10</x>
       <y>10</y>
       <width>200</width>
-      <height>101</height>
+      <height>81</height>
      </rect>
     </property>
     <property name="title">
@@ -36,7 +36,7 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>25</y>
+       <y>20</y>
        <width>180</width>
        <height>20</height>
       </rect>
@@ -46,7 +46,7 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>60</y>
+       <y>50</y>
        <width>181</width>
        <height>23</height>
       </rect>
@@ -71,7 +71,7 @@
     <property name="title">
      <string>Controls</string>
     </property>
-    <widget class="QDial" name="dial_zoom">
+    <widget class="QDial" name="dial_1">
      <property name="geometry">
       <rect>
        <x>70</x>
@@ -120,7 +120,7 @@
       <bool>true</bool>
      </property>
     </widget>
-    <widget class="QDial" name="dial_focus">
+    <widget class="QDial" name="dial_2">
      <property name="enabled">
       <bool>true</bool>
      </property>
@@ -172,7 +172,7 @@
       <bool>true</bool>
      </property>
     </widget>
-    <widget class="QLabel" name="label_zoom">
+    <widget class="QLabel" name="label_1">
      <property name="geometry">
       <rect>
        <x>130</x>
@@ -185,7 +185,7 @@
       <string>0</string>
      </property>
     </widget>
-    <widget class="QLabel" name="label_focus">
+    <widget class="QLabel" name="label_2">
      <property name="geometry">
       <rect>
        <x>300</x>
@@ -198,7 +198,7 @@
       <string>0</string>
      </property>
     </widget>
-    <widget class="QLabel" name="label">
+    <widget class="QLabel" name="label_l1">
      <property name="geometry">
       <rect>
        <x>130</x>
@@ -217,7 +217,7 @@
       <string>Focus</string>
      </property>
     </widget>
-    <widget class="QLabel" name="label_2">
+    <widget class="QLabel" name="label_l2">
      <property name="geometry">
       <rect>
        <x>300</x>
@@ -236,7 +236,7 @@
       <string>Zoom</string>
      </property>
     </widget>
-    <widget class="QLabel" name="label_focus_real">
+    <widget class="QLabel" name="label_1_real">
      <property name="geometry">
       <rect>
        <x>130</x>
@@ -249,7 +249,7 @@
       <string>0</string>
      </property>
     </widget>
-    <widget class="QLabel" name="label_zoom_real">
+    <widget class="QLabel" name="label_2_real">
      <property name="geometry">
       <rect>
        <x>300</x>
@@ -301,6 +301,22 @@
       <string>Real position</string>
      </property>
     </widget>
+    <widget class="QPushButton" name="push_zero">
+     <property name="geometry">
+      <rect>
+       <x>380</x>
+       <y>190</y>
+       <width>21</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use thic button to calibrate lens.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;1. Move dials to maximal position&lt;/p&gt;&lt;p&gt;2. Click &amp;quot;0&amp;quot; button. (It will make controller think it is in 0 position)&lt;/p&gt;&lt;p&gt;3. Move dials to maximal position again. (Lens will try to go beyond limits)&lt;/p&gt;&lt;p&gt;4. Your lens is calibrated.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="text">
+      <string>0</string>
+     </property>
+    </widget>
    </widget>
    <widget class="QGroupBox" name="group_preview">
     <property name="geometry">
@@ -329,9 +345,9 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>120</y>
+      <y>100</y>
       <width>201</width>
-      <height>111</height>
+      <height>131</height>
      </rect>
     </property>
     <property name="title">
@@ -343,11 +359,72 @@
        <x>10</x>
        <y>20</y>
        <width>181</width>
-       <height>71</height>
+       <height>23</height>
       </rect>
      </property>
      <property name="text">
       <string>Connect to cemera</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btn_autofocus">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>50</y>
+       <width>181</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Autofocus</string>
+     </property>
+    </widget>
+    <widget class="QProgressBar" name="progress_focus">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>80</y>
+       <width>181</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="maximum">
+      <number>100000</number>
+     </property>
+     <property name="value">
+      <number>0</number>
+     </property>
+     <property name="textVisible">
+      <bool>false</bool>
+     </property>
+     <property name="format">
+      <string>%v</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_3">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>110</y>
+       <width>46</width>
+       <height>13</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Blur ratio:</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_blur">
+     <property name="geometry">
+      <rect>
+       <x>70</x>
+       <y>110</y>
+       <width>81</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>0</string>
      </property>
     </widget>
    </widget>

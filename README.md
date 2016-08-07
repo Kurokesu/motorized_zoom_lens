@@ -11,16 +11,6 @@
 
 
 ### Images
-<img src="imagesv0.2_tele.jpg" width="300px"/>
+<img src="images/v0.4_view.png" width="400px"/>
 
-
-### Videos
-
-<a href="http://www.youtube.com/watch?feature=player_embedded&v=CsVZl6bo17Y
-" target="_blank"><img src="http://img.youtube.com/vi/CsVZl6bo17Y/0.jpg" 
- width="320" height="240" border="10" /></a>
- 
- 
-<a href="http://www.youtube.com/watch?feature=player_embedded&v=qqULx-mhv6U
-" target="_blank"><img src="http://img.youtube.com/vi/qqULx-mhv6U/0.jpg" 
- width="320" height="240" border="10" /></a>
+<img src="images/IMG_1421_2r.jpg" width="400px"/>
