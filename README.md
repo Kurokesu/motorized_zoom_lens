@@ -23,7 +23,7 @@
   * Tools -> Port -> Chose one you are using
 
 ### Commands
-### G0
+#### G0
 Move motors to new position
    
 Example [G0 X100 Y100] - to move motors to new position
@@ -38,7 +38,7 @@ Instant stop
 
 Example [M0]
 
-### M98
+#### M98
 Experimental set motor power
 
 Example [M98 R1]
@@ -46,7 +46,7 @@ Example [M98 R1]
  * R2 -> 50%
  * R3 -> 67%
  * R4 -> 100%
- 
+
 #### M99
 Experimental set movement speed
 
