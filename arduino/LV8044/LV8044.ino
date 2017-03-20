@@ -1,4 +1,5 @@
 // Author: Saulius Lukse
+
 // Copyright: Copyright 2016, kurokesu.com
 // version: 0.3
 // license: GPL
@@ -446,7 +447,7 @@ void loop()
             desired_s2 = counter_s2;
         }
 
-        // M99 - power
+        // M99 - speed
         // M99 R100
         // M99 R10000
         // Don't change while moving, there will be glitch and probably missing steps...
@@ -460,7 +461,7 @@ void loop()
         }
 
         // M98 - set coil power   
-        // M98 R1..2 / 33..100%
+        // M98 R1..4 / 33..100%
         if (m_num == 98)
         {
             if (r_num != MAX_ERR && r_num != 0)

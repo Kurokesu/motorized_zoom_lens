@@ -1,7 +1,7 @@
 {
-    "1": "", 
+    "1": "0", 
     "2": "0", 
-    "boot_count": 240, 
-    "clean_exit": false, 
-    "port": "COM74"
+    "boot_count": 300, 
+    "clean_exit": true, 
+    "port": "COM75"
 }
