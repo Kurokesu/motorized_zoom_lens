@@ -1,14 +1,7 @@
 {
     "1": "0", 
     "2": "0", 
-<<<<<<< HEAD
-    "boot_count": 300, 
-    "clean_exit": true, 
-    "port": "COM75"
-}
-=======
     "boot_count": 0, 
     "clean_exit": true, 
     "port": "COM74"
 }
->>>>>>> origin/master
