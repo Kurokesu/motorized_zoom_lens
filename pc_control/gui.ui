@@ -52,7 +52,7 @@
       </rect>
      </property>
      <property name="text">
-      <string>Connect to controller</string>
+      <string>Connect to Controller</string>
      </property>
     </widget>
    </widget>
@@ -363,7 +363,7 @@
       </rect>
      </property>
      <property name="text">
-      <string>Connect to cemera</string>
+      <string>Connect to Camera</string>
      </property>
     </widget>
     <widget class="QPushButton" name="btn_autofocus">
@@ -435,7 +435,7 @@
      <x>0</x>
      <y>0</y>
      <width>640</width>
-     <height>21</height>
+     <height>26</height>
     </rect>
    </property>
   </widget>
