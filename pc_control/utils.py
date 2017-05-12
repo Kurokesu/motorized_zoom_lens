@@ -1,9 +1,10 @@
 #!/usr/bin/env/python3
+
 # -*- coding: utf-8 -*-
 
-__author__ = "Saulius Lukse"
-__copyright__ = "Copyright 2016, kurokesu.com"
-__version__ = "0.2"
+__author__      = "Saulius Lukse"
+__copyright__   = "Copyright 2016-2017, kurokesu.com"
+__version__ = "0.5"
 __license__ = "GPL"
 
 
