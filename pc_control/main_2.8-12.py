@@ -1,7 +1,8 @@
+#!/usr/bin/env/python3
 # -*- coding: utf-8 -*-
 
-__author__      = "Saulius Lukse"
-__copyright__   = "Copyright 2016, kurokesu.com"
+__author__ = "Saulius Lukse"
+__copyright__ = "Copyright 2016, kurokesu.com"
 __version__ = "0.4"
 __license__ = "GPL"
 
@@ -26,17 +27,19 @@ v0.4
 ----
 * basic software autofocus implementation
 
+v0.5
+----
+* Converted to PyQt5 by Nick Zanobini
+
 '''
 
 import sys
 import os
-from PyQt4 import QtGui, uic, QtCore
-import time
+from PyQt5 import QtCore, QtGui, QtWidgets, uic
 import threading
-import Queue
+import queue
 import utils
 import cv2
-import numpy as np
 
 
 if os.name == 'nt':
@@ -52,8 +55,8 @@ else:
 
 form_class = uic.loadUiType("gui.ui")[0]
 ser = serial.Serial()
-q = Queue.Queue()
-q_labels = Queue.Queue()
+q = queue.Queue()
+q_labels = queue.Queue()
 max_1 = 55000
 max_2 = 21000
 
@@ -66,7 +69,7 @@ config = {}
 boot_sequence = True
 video_running = False
 capture_thread = None
-q_video = Queue.Queue()
+q_video = queue.Queue()
 
 autofocus_state = 0
 focus_data = []
@@ -74,10 +77,11 @@ focus_data = []
 
 config = utils.json_boot_routine(json_file)
 
+
 def get_blur(frame, scale):
-    frame = cv2.resize(frame, None, fx=scale, fy=scale, interpolation = cv2.INTER_CUBIC)
+    frame = cv2.resize(frame, None, fx=scale, fy=scale, interpolation=cv2.INTER_CUBIC)
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    fm = cv2.Laplacian(gray, cv2.CV_64F).var()     
+    fm = cv2.Laplacian(gray, cv2.CV_64F).var()
     return fm
 
 
@@ -89,7 +93,7 @@ def grab(cam, queue, width, height, fps):
     capture.set(cv2.CAP_PROP_FPS, fps)
 
     while(running):
-        frame = {}        
+        frame = {}
         capture.grab()
         retval, img = capture.retrieve(0)
         frame["img"] = img
@@ -102,9 +106,10 @@ def grab(cam, queue, width, height, fps):
         if queue.qsize() < 10:
             queue.put(frame)
         else:
-            print queue.qsize()
+            print(queue.qsize())
 
-class OwnImageWidget(QtGui.QWidget):
+
+class OwnImageWidget(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super(OwnImageWidget, self).__init__(parent)
         self.image = None
@@ -123,9 +128,9 @@ class OwnImageWidget(QtGui.QWidget):
         qp.end()
 
 
-class MyWindowClass(QtGui.QMainWindow, form_class):
+class MyWindowClass(QtWidgets.QMainWindow, form_class):
     def __init__(self, parent=None):
-        QtGui.QMainWindow.__init__(self, parent)
+        QtWidgets.QMainWindow.__init__(self, parent)
         self.setupUi(self)
 
         self.btn_video.clicked.connect(self.start_video_clicked)
@@ -146,8 +151,8 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
         self.dial_2.setMaximum(max_2)
 
         # setup video timer and widget
-        w = self.widget_video.width() 
-        h = self.widget_video.height() 
+        w = self.widget_video.width()
+        h = self.widget_video.height()
         self.widget_video = OwnImageWidget(self.widget_video)
         self.widget_video.resize(w, h)
 
@@ -168,8 +173,7 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
 
     def zero_clicked(self):
         cmd = 'G92 X0 Y0\n'
-        ser.write(cmd)
-
+        ser.write(bytes(cmd, 'utf8'))
 
     def update_frame(self):
         global autofocus_state
@@ -178,10 +182,10 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
 
         if not q_video.empty():
             self.btn_video.setText('Camera is live')
-            #self.btn_autofocus.setEnabled(True)
+            # self.btn_autofocus.setEnabled(True)
             frame = q_video.get()
             img = frame["img"]
-            #print frame["1"], frame["2"]
+            # print frame["1"], frame["2"]
 
             img_height, img_width, img_colors = img.shape
 
@@ -191,8 +195,8 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
 
             if scale == 0:
                 scale = 1
-            
-            img = cv2.resize(img, None, fx=scale, fy=scale, interpolation = cv2.INTER_CUBIC)
+
+            img = cv2.resize(img, None, fx=scale, fy=scale, interpolation=cv2.INTER_CUBIC)
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
             height, width, bpc = img.shape
             bpl = bpc * width
@@ -211,7 +215,7 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
                 self.btn_autofocus.setText('Going to 0 focus point...')
                 focus_data = []
                 pass
-            
+
             # swith to next state
             if (autofocus_state == 1) and (int(frame["1"]) == 0):
                 autofocus_state = 2
@@ -222,14 +226,13 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
 
                 # save data
                 metadata = frame
-                metadata["img"] = None # don't collect whole frame
+                metadata["img"] = None  # don't collect whole frame
                 focus_data.append(metadata)
 
                 # move lens
                 value = self.dial_1.value()
                 value += autofocus_step
                 self.dial_1.setValue(value)
-
 
             if (autofocus_state == 2) and (int(frame["1"]) == 55000):
                 autofocus_state = 3
@@ -245,8 +248,8 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
                         max_focus_val = float(frame["blur"])
                         max_focus_pos = int(frame["1"])
 
-                print max_focus_val, max_focus_pos
-                autofocus_best = max_focus_pos + 800 # backlash in a lens
+                print(max_focus_val, max_focus_pos)
+                autofocus_best = max_focus_pos + 800  # backlash in a lens
 
                 self.btn_autofocus.setText('Analyzing data...')
 
@@ -262,9 +265,8 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
                 self.dial_1.setEnabled(True)
                 self.dial_2.setEnabled(True)
 
-
-            #self.label_temp.setText(str(len(focus_data)))
-            #self.label_temp.setText(str(frame["1"]))
+            # self.label_temp.setText(str(len(focus_data)))
+            # self.label_temp.setText(str(frame["1"]))
 
     def btn_autofocus_clicked(self):
         global autofocus_state
@@ -274,11 +276,8 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
             self.dial_1.setEnabled(False)
             self.dial_2.setEnabled(False)
             autofocus_state = 1
-            #self.btn_autofocus.setText('Going to 0 focus point...')
-            self.dial_1.setValue(0) # change focus to 0
-
-
-
+            # self.btn_autofocus.setText('Going to 0 focus point...')
+            self.dial_1.setValue(0)  # change focus to 0
 
         '''
         start autofocus thread + state machine
@@ -292,7 +291,6 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
 
         '''
 
-
     def start_video_clicked(self):
         global video_running
         video_running = True
@@ -300,7 +298,6 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
         self.btn_video.setEnabled(False)
         self.btn_autofocus.setEnabled(True)
         self.btn_video.setText('Starting...')
-
 
     def update_pos(self):
         global boot_sequence
@@ -311,8 +308,8 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
                 self.label_2_real.setText(f["Y"])
             else:
                 # Send command to adjust offset to controller
-                cmd = 'G92 X'+str(config["1"])+' Y'+str(config["2"])+'\n'
-                ser.write(cmd)
+                cmd = 'G92 X' + str(config["1"]) + ' Y' + str(config["2"]) + '\n'
+                ser.write(bytes(cmd, 'utf8'))
 
                 # update dials
                 self.dial_1.setValue(int(config["1"]))
@@ -323,8 +320,6 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
                 self.dial_1.setEnabled(True)
                 self.push_zero.setEnabled(True)
                 boot_sequence = False
-
-
 
     def btn_connect_clicked(self):
         global ser
@@ -337,8 +332,8 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
             ser.flushOutput()
             config["port"] = str(self.combo_ports.currentText())
 
-        except Exception, e:
-            reply = QtGui.QMessageBox.warning(self, 'Serial port error', str(e))
+        except Exception as e:
+            self.reply = QtWidgets.QMessageBox.warning(self, 'Serial port error', str(e))
             return 0
 
         self.group_controls.setEnabled(True)
@@ -346,19 +341,19 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
         self.combo_ports.setEnabled(False)
         self.dial_2.setEnabled(False)
         self.dial_1.setEnabled(False)
-        #self.push_zero.setEnabled(False)
+        # self.push_zero.setEnabled(False)
 
     def adjust_2(self):
         value = self.dial_2.value()
         self.label_2.setText(str(value))
-        cmd = 'G0 Y'+str(value)+'\n'
-        ser.write(cmd)
+        cmd = 'G0 Y' + str(value) + '\n'
+        ser.write(bytes(cmd, 'utf8'))
 
     def adjust_1(self):
         value = self.dial_1.value()
         self.label_1.setText(str(value))
-        cmd = 'G0 X'+str(value)+'\n'
-        ser.write(cmd)
+        cmd = 'G0 X' + str(value) + '\n'
+        ser.write(bytes(cmd, 'utf8'))
 
     def closeEvent(self, event):
         global config
@@ -369,9 +364,9 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
 
 
 def serial_sender():
-    global ser  
+    global ser
 
-    line_old = None 
+    line_old = None
     while running:
         if ser.isOpen():
             try:
@@ -384,7 +379,7 @@ def serial_sender():
                         l_s = l.split("=")
                         if len(l_s) == 2:
                             feedback[str(l_s[0])] = l_s[int(1)]
-                    
+
                     q_labels.put(feedback)
 
                     if not boot_sequence:
@@ -392,13 +387,13 @@ def serial_sender():
                         config["2"] = feedback["Y"]
 
                 line_old = line
-            except:
+            except e:
                 pass
 
 
-capture_thread = threading.Thread(target=grab, args = (0, q_video, 640, 360, 30))
+capture_thread = threading.Thread(target=grab, args=(0, q_video, 640, 360, 30))
 threading.Thread(target=serial_sender).start()
-app = QtGui.QApplication(sys.argv)
+app = QtWidgets.QApplication(sys.argv)
 myWindow = MyWindowClass(None)
 myWindow.show()
 app.exec_()
