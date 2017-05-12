@@ -1,9 +1,10 @@
-#!/usr/bin/env/python3
+#! /usr/bin/env python3
+
 # -*- coding: utf-8 -*-
 
 __author__ = "Saulius Lukse"
-__copyright__ = "Copyright 2016, kurokesu.com"
-__version__ = "0.4"
+__copyright__ = "Copyright 2016-2017, kurokesu.com"
+__version__ = "0.5"
 __license__ = "GPL"
 
 
@@ -41,6 +42,7 @@ import queue
 import utils
 import cv2
 
+print(sys.version)
 
 if os.name == 'nt':
     from serial.tools.list_ports_windows import *
@@ -370,7 +372,7 @@ def serial_sender():
     while running:
         if ser.isOpen():
             try:
-                rd = ser.readline()
+                rd = str(ser.readline())
                 line = rd.rstrip()
                 if line != line_old:
                     feedback = {}
