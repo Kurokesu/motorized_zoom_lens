@@ -1,3 +1,7 @@
+## This is deprecated mk1 controller design. For updated more advanced controller please check https://www.kurokesu.com
+
+---
+
 ### Python
 
 1. Install pyqt:
