@@ -1,4 +1,4 @@
-## This is deprecated mk1 controller design. For updated more advanced controller please check https://www.kurokesu.com
+## This is deprecated mk1 controller design. For updated more advanced controller please check new GitHub repository https://github.com/Kurokesu/SCF4-SDK
 
 ---
 
